@@ -13,15 +13,14 @@ namespace Rabbits
         private static Random rnd = new Random();
         private bool _isActive;
         private bool _isDead;
-        private int _age;
         private long _timeCreated;
+        private long _timeDead;
         private Point _point;
 
         public Duck():
             base(Rabbits.Properties.Resources.duck, rnd.Next(1,Game.CANVAS_WIDTH-512), rnd.Next(1,Game.CANVAS_HEIHT-512))
         {
             _isActive = false;
-            _age = 0;
             _timeCreated = Environment.TickCount;
             _isDead = false;
             _point.X = rnd.Next(1, Game.CANVAS_WIDTH - 512);
@@ -32,6 +31,7 @@ namespace Rabbits
         {
             _isDead = true;
             Texture = Rabbits.Properties.Resources.duck_dead;
+            _timeDead = Environment.TickCount;
         }
 
         public bool Dead
@@ -58,7 +58,19 @@ namespace Rabbits
         public void setNotActive()
         {
             _isActive = false;
-            Texture = Rabbits.Properties.Resources.duck;
+            if (_isDead)
+            {
+                Texture = Rabbits.Properties.Resources.duck_dead;
+            }
+            else
+            {
+                Texture = Rabbits.Properties.Resources.duck;
+            }
+        }
+
+        public long TimeDead
+        {
+            get { return _timeDead; }
         }
 
         public void Update()
@@ -68,7 +80,7 @@ namespace Rabbits
                 Kill();
             } else
             {
-                if (!_isActive )
+                if (!_isActive && !_isDead)
                 {
                     if (X == _point.X && Y == _point.Y)
                     {

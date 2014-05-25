@@ -36,10 +36,31 @@ namespace Rabbits
             renderThread.Start();
         }
 
+        public void KillAll()
+        {
+            ducks.ForEach(delegate(Duck d)
+            {
+                d.Kill();
+            });
+        }
+
         public void keyPressed(KeyEventArgs k)
         {
             bool flag=true;
             Console.WriteLine("Key pressed");
+            if (k.KeyCode==Keys.C)
+            {
+                lock(ducks)
+                {
+                    ducks.Add(new Duck());
+                }
+                return;
+            }
+            if (k.Control && k.KeyCode==Keys.K)
+            {
+                KillAll();
+                return;
+            }
             ducks.ForEach(delegate(Duck d)
             {
                 if (d.Active && flag)
@@ -111,11 +132,15 @@ namespace Rabbits
                     {
                         frameGraphics.DrawImage(tex_grass, x * Game.TILE_SIDE_LENTH, y * Game.TILE_SIDE_LENTH);
                     }
-                ducks.ForEach(delegate(Duck d)
+                lock(ducks)
                 {
-                    d.Update();
-                    frameGraphics.DrawImage(d.Texture, new Rectangle(d.X,d.Y,d.Width,d.Height));
-                });
+                    ducks.ForEach(delegate(Duck d)
+                    {
+                        d.Update();
+                        frameGraphics.DrawImage(d.Texture, new Rectangle(d.X, d.Y, d.Width, d.Height));
+                    });
+                }
+
                 drawHandle.DrawImage(frame, 0, 0);
 
                 //Benchmarking
@@ -126,7 +151,21 @@ namespace Rabbits
                     Console.WriteLine("Engine: " + framesRendered + " fps");
                     framesRendered = 0;
                     startTime = Environment.TickCount;
+                    garbageCollect();
+                }
+            }
+        }
 
+        private void garbageCollect()
+        {
+            for (int i=ducks.Count - 1; i>=0; i--)
+            {
+                if ((Environment.TickCount - ducks[i].TimeDead) > 1000 && ducks[i].Dead)
+                {
+                    lock(ducks)
+                    {
+                        ducks.RemoveAt(i);
+                    }
                 }
             }
         }
