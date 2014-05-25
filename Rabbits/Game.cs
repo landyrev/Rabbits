@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace Rabbits
 {
@@ -32,6 +33,16 @@ namespace Rabbits
         public void stopGame()
         {
             engine.stop();
+        }
+
+        public void onMouseClick(Point p)
+        {
+            engine.onMouseClick(p);
+        }
+
+        public void onButtonDown(object sender, KeyEventArgs e)
+        {
+            engine.keyPressed(e);
         }
     }
 

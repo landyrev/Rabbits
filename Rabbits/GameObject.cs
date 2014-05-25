@@ -14,12 +14,13 @@ namespace Rabbits
         private int _width;
         private int _x;
         private int _y;
+        private float _scale = 0.5f;
 
         public GameObject(Bitmap texture, int x, int y)
         {
             _texture = texture;
-            _width = _texture.Width;
-            _height = _texture.Height;
+            _width = (int)((float)_texture.Width*_scale);
+            _height = (int)((float)_texture.Height * _scale);
             _x = x;
             _y = y;
         }

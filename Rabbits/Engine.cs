@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace Rabbits
 {
@@ -13,10 +14,10 @@ namespace Rabbits
         //Members
         private Graphics drawHandle;
         private Thread renderThread;
+        private const int moveSpeed = 5;
 
         public List<Duck> ducks = new List<Duck>();
 
-        private Bitmap tex_duck;
         private Bitmap tex_grass;
 
         //Functions
@@ -35,16 +36,62 @@ namespace Rabbits
             renderThread.Start();
         }
 
+        public void keyPressed(KeyEventArgs k)
+        {
+            bool flag=true;
+            Console.WriteLine("Key pressed");
+            ducks.ForEach(delegate(Duck d)
+            {
+                if (d.Active && flag)
+                {
+                    switch (k.KeyCode)
+                    {
+                        case Keys.Up:
+                            d.Y -= moveSpeed;
+                            break;
+                        case Keys.Down:
+                            d.Y += moveSpeed;
+                            break;
+                        case Keys.Left:
+                            d.X -= moveSpeed;
+                            break;
+                        case Keys.Right:
+                            d.X += moveSpeed;
+                            break;
+                        case Keys.K:
+                            d.Kill();
+                            break;
+                    }
+                }
+            });
+        }
+
         //Loads resources
         private void loadAssets()
         {
-            tex_duck = Rabbits.Properties.Resources.duck;
             tex_grass = Rabbits.Properties.Resources.grass;
         }
 
         public void stop()
         {
             renderThread.Abort();
+        }
+
+        public void onMouseClick(Point p)
+        {
+            Console.WriteLine("X=" + p.X.ToString() + " Y=" + p.Y.ToString());
+            bool flag = true;
+            ducks.ForEach(delegate(Duck d)
+            {
+                if (p.X>=d.X && p.X<(d.X+d.Height) && flag && !d.Active && !d.Dead)
+                    if (p.Y>=d.Y && p.Y<(d.Y+d.Width))
+                    {
+                        Console.WriteLine("dX=" + d.X + " dY=" + d.Y);
+                        Console.WriteLine("dX=" + d.Width + " dY=" + d.Height);
+                        d.setActive(ducks);
+                        flag = false;
+                    }
+            });
         }
 
         private void render()
@@ -64,14 +111,11 @@ namespace Rabbits
                     {
                         frameGraphics.DrawImage(tex_grass, x * Game.TILE_SIDE_LENTH, y * Game.TILE_SIDE_LENTH);
                     }
-
                 ducks.ForEach(delegate(Duck d)
                 {
                     d.Update();
-                    frameGraphics.DrawImage(d.Texture, d.X, d.Y);
+                    frameGraphics.DrawImage(d.Texture, new Rectangle(d.X,d.Y,d.Width,d.Height));
                 });
-
-                frameGraphics.DrawImage(tex_duck, move, move);
                 drawHandle.DrawImage(frame, 0, 0);
 
                 //Benchmarking
